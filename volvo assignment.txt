@@ -1,0 +1,143 @@
+To implement the "Buy the Car" scenario using the Robot Framework with Selenium (suppose i am buying a car from a web shop)
+
+**Project Structure**
+
+
+web_shop_robot/
+ tests/
+    buy_car.robot
+    resources/
+      keywords.robot
+         locators.robot
+             reports/
+               Dockerfile
+               requirements.txt
+                   README.md
+2. Test Case File
+Created the test case file that describes the "Buy the Car" scenario in the Robot Framework .
+
+**File: tests/buy_car.robot**
+
+*** Settings ***
+Documentation    Test suite for buying a car in the web shop.
+Resource         ../resources/keywords.robot
+Resource         ../resources/locators.robot
+Suite Setup      Open Browser To Home Page
+Suite Teardown   Close Browser
+
+*** Test Cases ***
+**Buy A Car**
+    [Documentation]    Test buying a car scenario.
+    Search For A Car    Tesla Model S
+    Select First Car From Results
+    Add Car To Cart
+    Go To Cart
+    Verify Car In Cart    Tesla Model S
+    Proceed To Checkout
+    Verify Checkout Confirmation
+**3. Keyword Definitions**
+Defined the keywords for the test steps. These keywords encapsulate the actions and assertions needed to perform the test.
+
+File: resources/keywords.robot
+
+*** Settings ***
+Library    SeleniumLibrary
+
+*** Variables ***
+${BROWSER}    chrome
+${URL}        https://cardekho.com
+${IMPLICIT_WAIT}    10
+
+*** Keywords ***
+Open Browser To Home Page
+    Open Browser    ${URL}    ${BROWSER}
+    Maximize Browser Window
+    Set Selenium Implicit Wait    ${IMPLICIT_WAIT}
+
+Search For A Car
+    [Arguments]    ${car_name}
+    Input Text    search_box    ${car_name}
+    Click Button    search_button
+
+Select First Car From Results
+    Click Element    first_result
+
+Add Car To Cart
+    Click Button    add_to_cart_button
+
+Go To Cart
+    Click Element    view_cart_button
+
+Verify Car In Cart
+    [Arguments]    ${car_name}
+    Element Text Should Be    cart_item    ${car_name}
+
+Proceed To Checkout
+    Click Button    checkout_button
+
+Verify Checkout Confirmation
+    Page Should Contain    Order Confirmation
+4. Locators
+Define the locators for the web elements in a separate file to keep the keywords clean and maintainable.
+
+File: resources/locators.robot
+
+*** Variables ***
+${search_box}            id=search
+${search_button}         css=.search-btn
+${first_result}          css=.product-item
+${add_to_cart_button}    id=add-to-cart
+${view_cart_button}      id=view-cart
+${cart_item}             css=.cart-item
+${checkout_button}       id=checkout
+5. Running the Tests
+**To run the tests using the Robot Framework, using the following command**
+robot -d reports tests/buy_car.robot
+**This command runs the test suite and generates a report in the reports/ directory**
+
+6. Dockerization 
+To run these tests in a Docker container, create a Dockerfile.
+File: Dockerfile
+**dockerfile**
+
+RUN pip install -r requirements.txt
+CMD ["robot", "-d", "reports", "tests/buy_car.robot"]
+**Build and run the Docker container**
+docker build -t web_shop_robot .
+docker run -v $(pwd)/reports:/app/reports web_shop_robot
+**Reporting**
+The Robot Framework automatically generates HTML and XML reports. The HTML report (report.html) and log (log.html) files are located in the reports/ directory.
+
+8. Requirements File
+Include all necessary dependencies in the requirements.txt file.
+
+**File: requirements.txt**
+robotframework==6.0
+robotframework-seleniumlibrary==6.0
+9. Documentation
+Add a README.md file to explain how to set up and run the tests.
+
+File: README.md
+##Web Shop Robot Framework Tests
+## Setup
+
+1. Install the dependencies:
+pip install -r requirements.txt
+
+2. Run the tests:
+robot -d reports tests/buy_car.robot
+
+3. To run the tests in Docker:
+docker build -t web_shop_robot .
+docker run -v $(pwd)/reports:/app/reports web_shop_robot
+
+
+**Reports**
+The test reports will be available in the `reports/` directory after running the tests.
+This setup provides a structured and maintainable way to test the "Buy the Car" scenario in a web shop using the Robot Framework, ensuring that the tests are clear and easily understandable by stakeholders.
+
+
+
+
+
+
